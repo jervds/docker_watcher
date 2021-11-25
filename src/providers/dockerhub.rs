@@ -1,19 +1,24 @@
 use serde::{Deserialize, Serialize};
-use futures::executor::block_on;
 use chrono::{DateTime, NaiveDate, NaiveTime};
-use crate::web::web_requests::make_call;
 use crate::config::docker_images::ImageToCheck;
-use std::error;
 use std::fmt;
+use std::{error, process};
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 pub(crate) fn check_image_validity(image: &ImageToCheck) -> Result<bool> {
-    let res = block_on(make_call(&image.registry));
-    match res {
-        Ok(body) => check_last_push_date(body,image),
-        Err(_) => panic!("Couldn't reach the repository")
-    }
+    let res = reqwest::blocking::get(&image.registry)
+        .unwrap_or_else(|err|{
+            eprintln!("Error when calling: {}", err);
+            process::exit(1);
+        })
+        .text()
+        .unwrap_or_else(|err|{
+            eprintln!("Error when calling: {}", err);
+            process::exit(2);
+        });
+    check_last_push_date(res,image)
+
 }
 
 #[derive(Serialize, Deserialize, Debug)]
