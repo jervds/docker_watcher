@@ -6,7 +6,17 @@ use std::io::Error;
 pub(crate) struct ImageToCheck {
     pub(crate) name: String,
     pub(crate) registry: String,
+    pub(crate) project_id: String,
+    pub(crate) branch: String,
+}
+
+pub(crate) struct ImageToCheckInternal {
+    pub(crate) name: String,
+    pub(crate) registry: String,
     pub(crate) last_build: String,
+    pub(crate) project_id: String,
+    pub(crate) branch: String,
+    pub(crate) trigger_pipeline: bool,
 }
 
 pub(crate) fn load_config(config_file: String) -> Result<Vec<ImageToCheck>,Error>{

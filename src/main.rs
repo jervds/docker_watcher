@@ -2,27 +2,50 @@ mod providers;
 mod config;
 mod gitlab;
 
-use crate::config::docker_images::load_config;
+use std::{env, error, process};
+
+use crate::config::docker_images::{ImageToCheck, ImageToCheckInternal, load_config};
 use crate::providers::dockerhub::check_image_validity;
 use crate::gitlab::pipelines::get_last_pipeline_run_time;
 
 fn main() {
-
-    let last_run_time = get_last_pipeline_run_time(String::from("37671"),String::from("master"));
-    match last_run_time {
-        Ok(last) => println!("{}",last),
-        Err(_) => panic!("Failed to load last runtime !")
-    }
-
-    let config = load_config(String::from("config.json"));
-    match config {
-        Ok(docker_images_to_scan) => {
-            for image_to_check in docker_images_to_scan.iter() {
-                let res = check_image_validity(image_to_check);
-                println!("The image {} should be updated: {}",image_to_check.name,res.unwrap())
+    load_config(String::from("config.json"))
+        .unwrap_or_else(|err| {
+            eprintln!("Failed to load configuration file: {}",err);
+            process::exit(4);
+        })
+        .into_iter()
+        .map(|image|{
+            //TODO it should be possible to improve this with a kind of copy() like in kotlin
+            ImageToCheckInternal {
+                name: image.name,
+                registry: image.registry,
+                //TODO the clone() could be avoided here?
+                last_build: get_last_pipeline_run_time(image.project_id.clone(), image.branch.clone()).unwrap(),
+                project_id: image.project_id,
+                branch: image.branch,
+                trigger_pipeline: false
             }
-        }
-        Err(_) => panic!("Failed to load the configuration !")
-    }
+        })
+        .map(|mut image| {
+            image.trigger_pipeline = check_image_validity(&image).unwrap_or_else(|err| {
+                eprintln!("Error when checking valididy for {} : {}", image.name,err);
+                process::exit(5);
+            });
+            image
+        })
+        .map(|image| {
+            if image.trigger_pipeline {
+                println!("Trigger pipeline for {}", image.name);
+            }
+            else {
+                println!("Do not trigger pipeline for {}",image.name);
+            }
+
+        })
+        //TODO remove the warning here! Collected values are not used
+        .collect::<()>();
+
+
 }
 

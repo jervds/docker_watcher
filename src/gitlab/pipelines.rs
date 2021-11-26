@@ -26,14 +26,14 @@ pub fn get_last_pipeline_run_time(project: String, branch: String) -> Result<Str
         })
         .parse_json()
         .pipelines.into_iter()
+        //TODO also check pipeline status
         .find(|pipeline| pipeline.r#ref == branch)
-        // .find(|pipeline| pipeline.status == "success")
         .unwrap_or_else(|| {
             eprintln!("No pipeline found for master!");
             process::exit(3);
         })
         ;
-    // let pipelines: GitlabPipelines = serde_json::from_str(&*res)?;
+    println!("pipeline last run time: {}",pipeline.created_at);
     Ok(pipeline.created_at.clone())
 }
 

@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
-use chrono::{DateTime, NaiveDate, NaiveTime};
-use crate::config::docker_images::ImageToCheck;
+use chrono::{DateTime};
 use std::fmt;
 use std::{error, process};
+use crate::ImageToCheckInternal;
+
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
-pub(crate) fn check_image_validity(image: &ImageToCheck) -> Result<bool> {
+pub(crate) fn check_image_validity(image: &ImageToCheckInternal) -> Result<bool> {
     let res = reqwest::blocking::get(&image.registry)
         .unwrap_or_else(|err|{
             eprintln!("Error when calling: {}", err);
@@ -40,20 +41,20 @@ struct EmptyVec;
 
 impl fmt::Display for EmptyVec {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        //TODO refactor this, it's a copy code from the official doc :)
         write!(f, "invalid first item to double")
     }
 }
 
 impl error::Error for EmptyVec {}
 
-fn check_last_push_date(body: String, image: &ImageToCheck) -> Result<bool> {
+fn check_last_push_date(body: String, image: &ImageToCheckInternal) -> Result<bool> {
     let docker_image_generic_description: DockerImageGenericDescription = serde_json::from_str(&*body)?;
-    let image_last_build = NaiveDate::parse_from_str(&image.last_build,"%Y-%m-%d")?
-        .and_time(NaiveTime::from_hms(0,0,0));
+    let base_image_last_build = DateTime::parse_from_rfc3339(&image.last_build)?;
 
     for image_detail in docker_image_generic_description.images.iter() {
-        let last_pushed_date = DateTime::parse_from_rfc3339(&image_detail.last_pushed)?.naive_utc();
-        if last_pushed_date.ge(&image_last_build) {
+        let last_pushed_date = DateTime::parse_from_rfc3339(&image_detail.last_pushed)?;
+        if last_pushed_date.ge(&base_image_last_build) {
             return Ok(true)
         }
     }

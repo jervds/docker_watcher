@@ -1,12 +1,14 @@
 [
   {
-    "name": "debian_omponent_built_before",
+    "name": "debian_component_built_before",
     "registry": "https://hub.docker.com/v2/repositories/library/debian/tags/bullseye",
-    "last_build": "2020-01-10"
+    "project_id": "37671",
+    "branch": "master"
   },
   {
     "name": "debian_component_built_later",
     "registry": "https://hub.docker.com/v2/repositories/library/debian/tags/bullseye",
-    "last_build": "2022-01-10"
+    "project_id": "37671",
+    "branch": "master"
   }
 ]
