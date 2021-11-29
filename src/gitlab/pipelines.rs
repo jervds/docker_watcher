@@ -5,12 +5,12 @@ use std::{env, error, process};
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 pub fn get_last_pipeline_run_time(project: String, branch: String) -> Result<String> {
-    //TODO handle the pagination
+    // TODO handle the pagination
     //curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/issues/8/notes?per_page=3&page=2"
-    //TODO handle the case in which no date is returned
+    // TODO handle the case in which no date is returned
     let gitlab_config = load_gitlab_config();
     let api_url = format!("https://innersource.soprasteria.com/api/v4/projects/{}/pipelines/", project);
-    println!("Querying on: {}", api_url);
+    // println!("Querying on: {}", api_url);
 
     let client = reqwest::blocking::Client::new();
 
@@ -26,14 +26,14 @@ pub fn get_last_pipeline_run_time(project: String, branch: String) -> Result<Str
         })
         .parse_json()
         .pipelines.into_iter()
-        //TODO also check pipeline status
+        // TODO also check pipeline status
         .find(|pipeline| pipeline.r#ref == branch)
         .unwrap_or_else(|| {
-            eprintln!("No pipeline found for master!");
+            eprintln!("No pipeline found for {}!", branch);
             process::exit(3);
         })
         ;
-    println!("pipeline last run time: {}",pipeline.created_at);
+    // println!("pipeline last run time: {}",pipeline.created_at);
     Ok(pipeline.created_at.clone())
 }
 

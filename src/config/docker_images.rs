@@ -15,7 +15,6 @@ pub(crate) struct ImageToCheckInternal {
     pub(crate) registry: String,
     pub(crate) last_build: String,
     pub(crate) project_id: String,
-    pub(crate) branch: String,
     pub(crate) trigger_pipeline: bool,
 }
 

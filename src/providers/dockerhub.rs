@@ -41,7 +41,7 @@ struct EmptyVec;
 
 impl fmt::Display for EmptyVec {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        //TODO refactor this, it's a copy code from the official doc :)
+        // TODO refactor this, it's a copy code from the official doc :)
         write!(f, "invalid first item to double")
     }
 }

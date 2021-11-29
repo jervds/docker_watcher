@@ -2,9 +2,9 @@ mod providers;
 mod config;
 mod gitlab;
 
-use std::{env, error, process};
+use std::{process};
 
-use crate::config::docker_images::{ImageToCheck, ImageToCheckInternal, load_config};
+use crate::config::docker_images::{ImageToCheckInternal, load_config};
 use crate::providers::dockerhub::check_image_validity;
 use crate::gitlab::pipelines::get_last_pipeline_run_time;
 
@@ -16,14 +16,13 @@ fn main() {
         })
         .into_iter()
         .map(|image|{
-            //TODO it should be possible to improve this with a kind of copy() like in kotlin
+            // TODO it should be possible to improve this with a kind of copy() like in kotlin
             ImageToCheckInternal {
                 name: image.name,
                 registry: image.registry,
-                //TODO the clone() could be avoided here?
+                // TODO the clone() could be avoided here?
                 last_build: get_last_pipeline_run_time(image.project_id.clone(), image.branch.clone()).unwrap(),
                 project_id: image.project_id,
-                branch: image.branch,
                 trigger_pipeline: false
             }
         })
@@ -36,14 +35,14 @@ fn main() {
         })
         .map(|image| {
             if image.trigger_pipeline {
-                println!("Trigger pipeline for {}", image.name);
+                println!(">>>>>>> refresh image {} on project id {}", image.name, image.project_id);
             }
             else {
-                println!("Do not trigger pipeline for {}",image.name);
+                println!(">>>>>>> Do not refresh image for {} on project id {}",image.name, image.project_id);
             }
 
         })
-        //TODO remove the warning here! Collected values are not used
+        // TODO remove the warning here! Collected values are not used
         .collect::<()>();
 
 

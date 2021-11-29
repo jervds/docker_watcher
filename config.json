@@ -1,14 +1,80 @@
 [
   {
-    "name": "debian_component_built_before",
+    "name": "cicd tools - debian based images",
     "registry": "https://hub.docker.com/v2/repositories/library/debian/tags/bullseye",
-    "project_id": "37671",
+    "project_id": "13658",
     "branch": "master"
   },
   {
-    "name": "debian_component_built_later",
-    "registry": "https://hub.docker.com/v2/repositories/library/debian/tags/bullseye",
-    "project_id": "37671",
+    "name": "cicd tools - golang based images",
+    "registry": "https://hub.docker.com/v2/repositories/library/golang/tags/latest",
+    "project_id": "13658",
     "branch": "master"
+  },
+  {
+    "name": "cicd tools - golang 1.17.1-alpine3.14 based images",
+    "registry": "https://hub.docker.com/v2/repositories/library/golang/tags/1.17.1-alpine3.14",
+    "project_id": "13658",
+    "branch": "master"
+  },
+  {
+    "name": "mirror: redis:latest",
+    "registry": "https://hub.docker.com/v2/repositories/library/redis/tags/latest",
+    "project_id": "91011",
+    "branch": "main"
+  },
+  {
+    "name": "mirror: postgres:latest",
+    "registry": "https://hub.docker.com/v2/repositories/library/postgres/tags/latest",
+    "project_id": "91010",
+    "branch": "main"
+  },
+  {
+    "name": "mirror: mongo:latest",
+    "registry": "https://hub.docker.com/v2/repositories/library/mongo/tags/latest",
+    "project_id": "91002",
+    "branch": "main"
+  },
+  {
+    "name": "mirror: testcontainers/ryuk:latest",
+    "registry": "https://hub.docker.com/v2/repositories/testcontainers/ryuk/tags/latest",
+    "project_id": "91033",
+    "branch": "main"
+  },
+  {
+    "name": "mirror: minio/minio:latest",
+    "registry": "https://hub.docker.com/v2/repositories/minio/minio/tags/latest",
+    "project_id": "92575",
+    "branch": "master"
+  },
+  {
+    "name": "mirror: licensefinder/license_finder:latest",
+    "registry": "https://hub.docker.com/v2/repositories/licensefinder/license_finder/tags/latest",
+    "project_id": "93353",
+    "branch": "master"
+  },
+  {
+    "name": "mirror: blazemeter/taurus:latest",
+    "registry": "https://hub.docker.com/v2/repositories/blazemeter/taurus/tags/latest",
+    "project_id": "92870",
+    "branch": "master"
+  },
+  {
+    "name": "mirror: rodolpheche/wiremock:2.31.0",
+    "registry": "https://hub.docker.com/v2/repositories/rodolpheche/wiremock/tags/2.31.0",
+    "project_id": "77508",
+    "branch": "master"
+  },
+  {
+    "name": "mirror: confluentinc/cp-schema-registry:latest",
+    "registry": "https://hub.docker.com/v2/repositories/confluentinc/cp-schema-registry/tags/latest",
+    "project_id": "91009",
+    "branch": "main"
+  },
+  {
+    "name": "mirror: confluentinc/cp-kafka:latest",
+    "registry": "https://hub.docker.com/v2/repositories/confluentinc/cp-kafka/tags/latest",
+    "project_id": "91008",
+    "branch": "main"
   }
 ]
