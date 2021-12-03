@@ -26,8 +26,7 @@ pub fn get_last_pipeline_run_time(project: String, branch: String) -> Result<Str
         })
         .parse_json()
         .pipelines.into_iter()
-        // TODO also check pipeline status
-        .find(|pipeline| pipeline.r#ref == branch)
+        .find(|pipeline| pipeline.r#ref == branch && pipeline.status == "success" )
         .unwrap_or_else(|| {
             eprintln!("No pipeline found for {}!", branch);
             process::exit(3);
