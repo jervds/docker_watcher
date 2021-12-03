@@ -1,14 +1,8 @@
 stages:
   - build
-  - run
 
 build:
   image: rust
   stage: build
   script:
     - cargo run
-
-run:
-  stage: run
-  script:
-    - echo "hello"
