@@ -9,7 +9,7 @@ use crate::providers::dockerhub::check_image_validity;
 use crate::gitlab::pipelines::get_last_pipeline_run_time;
 
 fn main() {
-    let image_to_refresh = load_config(String::from("config.json"))
+    load_config(String::from("config.json"))
         .unwrap_or_else(|err| {
             eprintln!("Failed to load configuration file: {}",err);
             process::exit(4);
@@ -43,12 +43,7 @@ fn main() {
                 false
             }
         })
-        .collect::<Vec<bool>>();
-
-    image_to_refresh
-        .into_iter()
-        .any(|to_refresh| to_refresh == true)
-        .then(|| panic!("At least one image should be refreshed !"));
+        .for_each(drop);
 
 }
 
