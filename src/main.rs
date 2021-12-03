@@ -9,7 +9,7 @@ use crate::providers::dockerhub::check_image_validity;
 use crate::gitlab::pipelines::get_last_pipeline_run_time;
 
 fn main() {
-    load_config(String::from("config.json"))
+    let image_to_refresh = load_config(String::from("config.json"))
         .unwrap_or_else(|err| {
             eprintln!("Failed to load configuration file: {}",err);
             process::exit(4);
@@ -36,15 +36,19 @@ fn main() {
         .map(|image| {
             if image.trigger_pipeline {
                 println!(">>>>>>> refresh image {} on project id {}", image.name, image.project_id);
+                true
             }
             else {
                 println!(">>>>>>> Do not refresh image for {} on project id {}",image.name, image.project_id);
+                false
             }
-
         })
-        // TODO remove the warning here! Collected values are not used
-        .collect::<()>();
+        .collect::<Vec<bool>>();
 
+    image_to_refresh
+        .into_iter()
+        .any(|to_refresh| to_refresh == true)
+        .then(|| panic!("At least one image should be refreshed !"));
 
 }
 
