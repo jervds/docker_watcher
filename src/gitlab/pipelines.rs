@@ -1,71 +1,9 @@
 use serde::{Deserialize, Serialize};
-use std::{env, error, process};
-
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-
-pub fn get_last_pipeline_run_time(project: String, branch: String) -> Result<String> {
-    // TODO handle the pagination
-    //curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/issues/8/notes?per_page=3&page=2"
-    // TODO handle the case in which no date is returned
-    let gitlab_config = load_gitlab_config();
-    let api_url = format!("https://innersource.soprasteria.com/api/v4/projects/{}/pipelines/", project);
-    // println!("Querying on: {}", api_url);
-
-    let client = reqwest::blocking::Client::new();
-
-    let pipeline = client.get(api_url).bearer_auth(gitlab_config.token).send()
-        .unwrap_or_else(|err| {
-            eprintln!("Error when calling: {}", err);
-            process::exit(1);
-        })
-        .text()
-        .unwrap_or_else(|err| {
-            eprintln!("Error when calling: {}", err);
-            process::exit(2);
-        })
-        .parse_json()
-        .pipelines.into_iter()
-        .find(|pipeline| pipeline.r#ref == branch && pipeline.status == "success" )
-        .unwrap_or_else(|| {
-            eprintln!("No pipeline found for {}!", branch);
-            process::exit(3);
-        })
-        ;
-    // println!("pipeline last run time: {}",pipeline.created_at);
-    Ok(pipeline.created_at.clone())
-}
-
-fn load_gitlab_config() -> GitlabConfig {
-    let cfg = GitlabConfig {
-        token: env::var("GITLAB_TOKEN")
-            .unwrap_or_else(|err| {
-                eprintln!("No token found. Please define GITLAB_TOKEN environment variable - {}",err);
-                process::exit(4);
-            })
-    };
-
-    cfg
-}
-
-trait ParseJson {
-    fn parse_json(&self) -> GitlabPipelines;
-}
-
-impl ParseJson for String {
-    fn parse_json(&self) -> GitlabPipelines {
-        let pipelines_from_json: Vec<GitlabPipelineApiDescription> = serde_json::from_str(&*self).unwrap_or_else(|err| {
-            eprintln!("Error when parsing response: {} on {}", err, self);
-            process::exit(1);
-        });
-        GitlabPipelines{
-            pipelines: pipelines_from_json,
-        }
-    }
-}
+use crate::config::gitlab::GitlabConfig;
+use crate::LocalImageDetails;
 
 #[derive(Serialize, Deserialize, Debug)]
-struct GitlabPipelines {
+pub struct GitlabPipelines {
     pipelines: Vec<GitlabPipelineApiDescription>,
 }
 
@@ -77,6 +15,50 @@ struct GitlabPipelineApiDescription {
     r#ref: String,
 }
 
-struct GitlabConfig {
-    token: String,
+impl GitlabPipelines {
+    pub fn last_run_for(local_image: &LocalImageDetails) -> Option<String> {
+        // TODO handle the pagination
+        // curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/issues/8/notes?per_page=3&page=2"
+        // TODO handle the case in which no date is returned
+        let gitlab_config = GitlabConfig::load();
+        if gitlab_config.is_none() { return None }
+
+        let pipeline = GitlabPipelines::find_pipeline(&gitlab_config.unwrap(),&local_image);
+        match pipeline {
+            Ok(a_pipeline) => Some(a_pipeline.created_at.clone()),
+            Err(_) => None
+        }
+    }
+
+    fn find_pipeline(cfg : &GitlabConfig, local_image: &LocalImageDetails) -> anyhow::Result<GitlabPipelineApiDescription> {
+        let client = reqwest::blocking::Client::new();
+        let pipeline = client
+            .get(GitlabConfig::pipeline_api(local_image.project_id.clone()))
+            .bearer_auth(cfg.token.clone())
+            .send()?
+            .text()?
+            .extract_pipelines_from_json()?
+            .pipelines.into_iter()
+            .find(|pipeline| pipeline.r#ref == local_image.branch && pipeline.status == "success" );
+
+        match pipeline {
+            Some(a_pipeline) => Ok(a_pipeline),
+            None => panic!("No pipeline found !"), //TODO should not panic ?
+        }
+    }
 }
+
+
+trait ParseJson {
+    fn extract_pipelines_from_json(&self) -> anyhow::Result<GitlabPipelines>;
+}
+
+impl ParseJson for String {
+    fn extract_pipelines_from_json(&self) -> anyhow::Result<GitlabPipelines> {
+        let pipelines_from_json: Vec<GitlabPipelineApiDescription> = serde_json::from_str(&*self)?;
+        Ok(GitlabPipelines{ pipelines: pipelines_from_json })
+    }
+}
+
+
+

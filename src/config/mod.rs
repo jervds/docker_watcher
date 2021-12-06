@@ -1,1 +1,2 @@
-pub(crate) mod docker_images;
+pub mod local_image_details;
+pub mod gitlab;
