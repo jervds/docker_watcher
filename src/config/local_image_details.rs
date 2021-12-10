@@ -10,12 +10,10 @@ pub struct LocalImageDetails {
     pub branch: String,
     #[serde(default)]
     pub last_build: Option<String>,
-    #[serde(default)]
-    pub trigger_pipeline: Option<bool>,
 }
 
 impl LocalImageDetails {
-    pub fn retrieve_last_local_build(&self) -> Option<Self> {
+    pub fn retrieve_last_local_build(self) -> Option<Self> {
         let last_run_time = GitlabPipelines::last_run_for(&self);
         match last_run_time {
             None => None,
@@ -23,22 +21,17 @@ impl LocalImageDetails {
         }
     }
 
-    pub fn check_last_build_time(&self) -> Self {
-        let trigger = Dockerhub::is_local_image_up_to_date(&self);
-        Self::from((self, trigger))
+    pub fn should_be_refreshed(&self) -> bool {
+        println!("image {} being checked",self.name);
+        match Dockerhub::has_newer_version_for(&self) {
+            None => false,
+            Some(has_newer_version) => has_newer_version
+        }
     }
 
-    pub fn refresh_image(&self) -> Self {
-        match self.trigger_pipeline {
-            None => println!("++++++ Unable to retrieve information for {}",self.name),
-            Some(trigger) => {
-                match trigger {
-                    true => println!(">>>>>>> refresh image {} on project id {}", self.name, self.project_id),
-                    false => println!(">>>>>>> Do not refresh image for {} on project id {}",self.name, self.project_id)
-                }
-            }
-        }
-        self.clone()
+    pub fn refresh_local_image(self) -> Self {
+        println!(">>>>>>> refresh image {} on project id {}", self.name, self.project_id);
+        self
     }
 
     pub fn load_config(config_file: String) -> Vec<Self> {
@@ -46,6 +39,7 @@ impl LocalImageDetails {
         match config {
             Ok(loaded_config) => Self::parse_config(loaded_config),
             Err(_) => {
+                //TODO use crate env_logger from https://docs.rs/log/latest/log/
                 println!("Failed to open configuration file");
                 Vec::new()
             }
@@ -65,31 +59,11 @@ impl LocalImageDetails {
     }
 }
 
-impl From<(&LocalImageDetails, String)> for LocalImageDetails {
-    fn from((image,last_build_time): (&LocalImageDetails, String)) -> Self {
+impl From<(LocalImageDetails, String)> for LocalImageDetails {
+    fn from((image,last_build_time): (LocalImageDetails, String)) -> Self {
         Self {
-            name: (*image.name).to_string(),
-            base_image_registry: (*image.base_image_registry).to_string(),
-            project_id: (*image.project_id).to_string(),
-            branch: (*image.branch).to_string(),
             last_build: Some(last_build_time),
-            trigger_pipeline: None
+            ..image
         }
     }
 }
-
-impl From<(&LocalImageDetails, Option<bool>)> for LocalImageDetails {
-    fn from((image,_trigger_pipeline): (&LocalImageDetails,  Option<bool>)) -> Self {
-        Self {
-            name: (*image.name).to_string(),
-            base_image_registry: (*image.base_image_registry).to_string(),
-            project_id: (*image.project_id).to_string(),
-            branch: (*image.branch).to_string(),
-            // TODO this is ugly !
-            last_build: Some((*image.last_build.as_ref().unwrap()).to_string()),
-            trigger_pipeline: _trigger_pipeline
-        }
-    }
-}
-
-//TODO Implement tests on both from methods

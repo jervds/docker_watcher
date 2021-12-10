@@ -20,21 +20,22 @@ impl GitlabPipelines {
         // TODO handle the pagination
         // curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/issues/8/notes?per_page=3&page=2"
         // TODO handle the case in which no date is returned
-        let gitlab_config = GitlabConfig::load();
-        if gitlab_config.is_none() { return None }
-
-        let pipeline = GitlabPipelines::find_pipeline(&gitlab_config.unwrap(),&local_image);
-        match pipeline {
-            Ok(a_pipeline) => Some(a_pipeline.created_at.clone()),
-            Err(_) => None
+        match GitlabConfig::load() {
+            None => None,
+            Some(gitlab_config) => {
+                match GitlabPipelines::find_pipeline(gitlab_config,&local_image) {
+                    Ok(a_pipeline) => Some(a_pipeline.created_at.clone()),
+                    Err(_) => None
+                }
+            }
         }
     }
 
-    fn find_pipeline(cfg : &GitlabConfig, local_image: &LocalImageDetails) -> anyhow::Result<GitlabPipelineApiDescription> {
+    fn find_pipeline(cfg : GitlabConfig, local_image: &LocalImageDetails) -> anyhow::Result<GitlabPipelineApiDescription> {
         let client = reqwest::blocking::Client::new();
         let pipeline = client
             .get(GitlabConfig::pipeline_api(local_image.project_id.clone()))
-            .bearer_auth(cfg.token.clone())
+            .bearer_auth(cfg.token)
             .send()?
             .text()?
             .extract_pipelines_from_json()?

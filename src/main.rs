@@ -9,9 +9,9 @@ use crate::providers::dockerhub::Dockerhub;
 fn main() -> anyhow::Result<()> {
     LocalImageDetails::load_config(String::from("config.json"))
         .into_iter()
-        .filter_map(|it| LocalImageDetails::retrieve_last_local_build(&it))
-        .map(|it | LocalImageDetails::check_last_build_time(&it))
-        .map(|it| { LocalImageDetails::refresh_image(&it) })
+        .filter_map(LocalImageDetails::retrieve_last_local_build)
+        .filter(LocalImageDetails::should_be_refreshed)
+        .map(LocalImageDetails::refresh_local_image)
         .for_each(drop);
     Ok(())
 }
