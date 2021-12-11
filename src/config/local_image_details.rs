@@ -6,7 +6,7 @@ use log::{error, info, warn};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LocalImageDetails {
     pub name: String,
-    pub base_image_registry: String,
+    pub image: String,
     pub project_id: String,
     pub branch: String,
     #[serde(default)]

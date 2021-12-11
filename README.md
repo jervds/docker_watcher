@@ -14,38 +14,36 @@ The application will then prompt the images that we have to rebuild:
 ## How to use
 ### Configuration
 #### environment variables
-| variable | description |
-| --- | --- |
-| GITLAB_TOKEN | A token being used to retrieve information from gitlab |
+| variable | description                                                                                    |
+| --- |------------------------------------------------------------------------------------------------|
+| GITLAB_TOKEN | A token being used to retrieve information from gitlab                                         |
+| RUST_LOG | Defines the logging level ( see [env_log](https://docs.rs/env_logger/0.9.0/env_logger/) crate) |
 
 #### config.json
 In order to work correctly, the application requires:
-- **name**: a human-readable identifier to know which project is concerned by the configuration
-- **registry**: the registry from which the base image is being pulled
+- **name**: a human-readable identifier to know which project is concerned by the configuration (for logging purpose only)
+- **image**: the image on which our local image is based
 - **project_id**: the identifier of the gitlab project in which the image is being used as base image
 - **branch**: the branch on which to check the build
 ```json
 [
   {
     "name": "cicd tools - debian based images",
-    "registry": "https://hub.docker.com/v2/repositories/library/debian/tags/bullseye",
+    "image": "debian:bullseye",
     "project_id": "13658",
     "branch": "master"
   },
   {
-    "name": "cicd tools - golang based images",
-    "registry": "https://hub.docker.com/v2/repositories/library/golang/tags/latest",
-    "project_id": "13658",
-    "branch": "master"
-  },
-  {
-    "name": "cicd tools - golang 1.17.1-alpine3.14 based images",
-    "registry": "https://hub.docker.com/v2/repositories/library/golang/tags/1.17.1-alpine3.14",
-    "project_id": "13658",
-    "branch": "master"
+    "name": "mirror: confluentinc/cp-kafka:latest",
+    "image": "confluentinc/cp-kafka:latest",
+    "project_id": "91008",
+    "branch": "main"
   }
 ]
 ```
 
 ### How to run
-Simply execure `cargo run`.
+Simply execute `cargo run`.
+
+### How to run tests
+Simply execute `cargo test`.
