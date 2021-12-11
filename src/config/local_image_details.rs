@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use crate::{Dockerhub, GitlabPipelines};
+use log::{error, info, warn};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LocalImageDetails {
@@ -22,7 +23,7 @@ impl LocalImageDetails {
     }
 
     pub fn should_be_refreshed(&self) -> bool {
-        println!("image {} being checked",self.name);
+        info!("image {} being checked",self.name);
         match Dockerhub::has_newer_version_for(&self) {
             None => false,
             Some(has_newer_version) => has_newer_version
@@ -30,7 +31,7 @@ impl LocalImageDetails {
     }
 
     pub fn refresh_local_image(self) -> Self {
-        println!(">>>>>>> refresh image {} on project id {}", self.name, self.project_id);
+        warn!(">>>>>>> refresh image {} on project id {}", self.name, self.project_id);
         self
     }
 
@@ -39,8 +40,7 @@ impl LocalImageDetails {
         match config {
             Ok(loaded_config) => Self::parse_config(loaded_config),
             Err(_) => {
-                //TODO use crate env_logger from https://docs.rs/log/latest/log/
-                println!("Failed to open configuration file");
+                error!("Failed to open configuration file {}",config_file);
                 Vec::new()
             }
         }
@@ -51,7 +51,7 @@ impl LocalImageDetails {
         match cfg {
             Ok(loaded) => loaded,
             Err(_) => {
-                println!("Failed to parse configuration");
+                error!("Failed to parse configuration");
                 Vec::new()
             }
         }

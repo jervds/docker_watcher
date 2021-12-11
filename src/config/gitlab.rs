@@ -1,4 +1,5 @@
 use std::{env};
+use log::{error};
 
 pub struct GitlabConfig {
     pub token: String,
@@ -9,7 +10,7 @@ impl GitlabConfig {
         match env::var("GITLAB_TOKEN") {
             Ok(env_token) => Some(GitlabConfig { token: env_token }),
             Err(_) => {
-                println!("Failed to load configuration");
+                error!("Failed to load gitlab configuration, make sure that GITLAB_TOKEN is defined.");
                 return None
             }
         }

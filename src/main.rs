@@ -7,6 +7,7 @@ use crate::gitlab::pipelines::{GitlabPipelines};
 use crate::providers::dockerhub::Dockerhub;
 
 fn main() -> anyhow::Result<()> {
+    env_logger::init();
     LocalImageDetails::load_config(String::from("config.json"))
         .into_iter()
         .filter_map(LocalImageDetails::retrieve_last_local_build)

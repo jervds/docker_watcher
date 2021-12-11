@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use chrono::DateTime;
 use crate::LocalImageDetails;
+use log::{error};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DockerHubImageDescription {
@@ -13,7 +14,7 @@ impl DockerHubImageDescription {
         match self.is_more_recent_than(&image) {
             Ok(newer) => Some(newer),
             Err(_) => {
-                println!("Error when comparing image dates");
+                error!("Error when comparing image dates: {} vs {}",&self.last_updated, image.last_build.as_ref().unwrap());
                 None
             }
         }
