@@ -12,7 +12,7 @@ test:
 
 run:
   variables:
-    RUST_LOG: error
+    RUST_LOG: warn
   image: rust
   stage: run
   script:
