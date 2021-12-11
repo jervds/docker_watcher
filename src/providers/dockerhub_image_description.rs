@@ -30,4 +30,67 @@ impl DockerHubImageDescription {
     }
 }
 
-// TODO implement test on is_newer_than
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_dockerhub(push_date: &str) -> DockerHubImageDescription {
+        DockerHubImageDescription {
+            id: 0,
+            last_updated: push_date.to_string()
+        }
+    }
+
+    fn sample_local_image(build_date: &str) -> LocalImageDetails {
+        LocalImageDetails {
+            name: String::from("sample"),
+            base_image_registry: String::from("sample"),
+            project_id: String::from("sample"),
+            branch: String::from("sample"),
+            last_build: Some(build_date.to_string())
+        }
+    }
+
+    #[test]
+    fn is_newer_than_should_return_some_when_dockerhub_image_is_newer() {
+        let local_image = sample_local_image("2021-09-09T21:20:21.385571Z");
+        let dockerhub_image = sample_dockerhub("2022-09-09T21:20:21.385571Z");
+        assert_eq!(dockerhub_image.is_newer_than(&local_image).is_some(), true);
+    }
+
+    #[test]
+    fn is_newer_than_should_return_true_when_dockerhub_image_is_newer() {
+        let local_image = sample_local_image("2021-09-09T21:20:21.385571Z");
+        let dockerhub_image = sample_dockerhub("2022-09-09T21:20:21.385571Z");
+        assert_eq!(dockerhub_image.is_newer_than(&local_image).unwrap(), true);
+    }
+
+    #[test]
+    fn is_newer_than_should_return_some_when_dockerhub_image_is_older() {
+        let local_image = sample_local_image("2022-09-09T21:20:21.385571Z");
+        let dockerhub_image = sample_dockerhub("2021-09-09T21:20:21.385571Z");
+        assert_eq!(dockerhub_image.is_newer_than(&local_image).is_some(), true);
+    }
+
+    #[test]
+    fn is_newer_than_should_return_false_when_dockerhub_image_is_older() {
+        let local_image = sample_local_image("2022-09-09T21:20:21.385571Z");
+        let dockerhub_image = sample_dockerhub("2021-09-09T21:20:21.385571Z");
+        assert_eq!(dockerhub_image.is_newer_than(&local_image).unwrap(), false);
+    }
+
+    #[test]
+    fn is_newer_than_should_return_none_when_local_image_build_date_is_in_incorrect_format() {
+        let local_image = sample_local_image("aaa");
+        let dockerhub_image = sample_dockerhub("2021-09-09T21:20:21.385571Z");
+        assert_eq!(dockerhub_image.is_newer_than(&local_image).is_none(), true);
+    }
+
+    #[test]
+    fn is_newer_than_should_return_none_when_dockerhub_image_push_date_is_in_incorrect_format() {
+        let local_image = sample_local_image("2022-09-09T21:20:21.385571Z");
+        let dockerhub_image = sample_dockerhub("aaa");
+        assert_eq!(dockerhub_image.is_newer_than(&local_image).is_none(), true);
+    }
+
+}

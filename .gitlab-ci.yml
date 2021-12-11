@@ -1,10 +1,19 @@
 stages:
-  - build
+  - test
+  - run
 
-build:
+test:
   variables:
     RUST_LOG: error
   image: rust
-  stage: build
+  stage: test
+  script:
+    - cargo test
+
+run:
+  variables:
+    RUST_LOG: error
+  image: rust
+  stage: run
   script:
     - cargo run
