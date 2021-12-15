@@ -34,7 +34,7 @@ impl GitlabPipelines {
     fn find_pipeline(cfg : GitlabConfig, local_image: &LocalImageDetails) -> anyhow::Result<GitlabPipelineApiDescription> {
         let client = reqwest::blocking::Client::new();
         let pipeline = client
-            .get(GitlabConfig::pipeline_api(local_image.project_id.clone()))
+            .get(cfg.pipeline_api(local_image.project_id.clone()))
             .bearer_auth(cfg.token)
             .send()?
             .text()?

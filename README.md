@@ -17,6 +17,7 @@ The application will then prompt the images that we have to rebuild:
 | variable | description                                                                                    |
 | --- |------------------------------------------------------------------------------------------------|
 | GITLAB_TOKEN | A token being used to retrieve information from gitlab                                         |
+| GITLAB_API | Defines the API url of your gitlab instance                                                    |
 | RUST_LOG | Defines the logging level ( see [env_log](https://docs.rs/env_logger/0.9.0/env_logger/) crate) |
 
 #### config.json
