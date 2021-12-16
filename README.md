@@ -6,9 +6,9 @@ that ran on our side and that uses the base image (ex: `cicd-tools:base` extends
 
 The application will then prompt the images that we have to rebuild:
 ```shell
->>>>>>> Do not refresh image for cicd tools - debian based images on project id 13658
->>>>>>> Do not refresh image for cicd tools - golang based images on project id 13658
->>>>>>> Do not refresh image for cicd tools - golang 1.17.1-alpine3.14 based images on project id 13658
+>>>>>>> Do not refresh image for my_project - debian based images on project id 13658
+>>>>>>> Do not refresh image for my_project - golang based images on project id 13658
+>>>>>>> Do not refresh image for my_project - golang 1.17.1-alpine3.14 based images on project id 13658
 ```
 
 ## How to use
